@@ -22,6 +22,7 @@ const allRoutes = {
   "/feed:get": (request, response) => {
     controller.getFeed(request, response);
   },
+  // get: when browswer wants some html from you
 
   // 404 routes
   default: (request, response) => {

@@ -2,32 +2,33 @@ const fs = require("fs/promises");
 const { DEFAULT_HEADER } = require("./util/util");
 const path = require("path");
 var qs = require("querystring");
+let ejs = require("ejs");
 
 const controller = {
   getHomePage: async (request, response) => {
-    const database = await fs.readFile("database/data.json", "utf8");
+    const database = await fs.readFile("./database/data.json", "utf8");
     const userArray = JSON.parse(database);
-    return response.end(`
-    <h1>Hello world</h1> <style> h1 {color:red;}</style>
-    <form action="/form" method="post">
-    <input type="text" name="username"><br>
-    <input type="text" name="password"><br>
-    <input type="submit" value="Upload">
-    </form>
-    `);
-  },
-  sendFormData: (request, response) => {
-    var body = "";
-
-    request.on("data", function (data) {
-      body += data;
+    console.log(userArray);
+    let htmlStr = "<h1>Users</h1>";
+    userArray.forEach((user) => {
+      htmlStr += `<div><input type='file' /><a href='/feed'>${user.username}</a></div>`;
     });
-
-    request.on("end", function () {
-      var post = qs.parse(body);
-      console.log(post);
-    });
+    response.setHeader("Content-Type", "text/html");
+    return response.end(htmlStr);
   },
+
+  //we don't need this: sendFormData: (request, response) => {
+  //     var body = "";
+
+  //     request.on("data", function (data) {
+  //       body += data;
+  //     });
+
+  //     request.on("end", function () {
+  //       var post = qs.parse(body);
+  //       console.log(post);
+  //     });
+  //   },
 
   getFeed: (request, response) => {
     // console.log(request.url); try: http://localhost:3000/feed?username=john123

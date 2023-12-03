@@ -5,6 +5,7 @@ const { createReadStream } = require("fs");
 const path = require("path");
 
 const allRoutes = {
+  // create a link to the profile pic for it to show up
   // GET: localhost:3000/ -> home page
   "/:get": (request, response) => {
     controller.getHomePage(request, response);
@@ -17,13 +18,13 @@ const allRoutes = {
   "/images:post": (request, response) => {
     controller.uploadImages(request, response);
   },
-  // GET: localhost:3000/feed
+  // GET: localhost:3000/feed?john123
   // Shows instagram profile for a given user
   "/feed:get": (request, response) => {
     controller.getFeed(request, response);
   },
-  // get: when browswer wants some html from you
-
+  // GET: when browswer wants some html from you
+  "/profile:get": (request, response) => {},
   // 404 routes
   default: (request, response) => {
     response.writeHead(404, DEFAULT_HEADER);

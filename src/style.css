@@ -1,0 +1,6 @@
+.frame .ellipse-2 {
+  position: relative;
+  width: 97px;
+  height: 97px;
+  object-fit: cover;
+}

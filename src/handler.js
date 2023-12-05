@@ -3,6 +3,7 @@ const { DEFAULT_HEADER } = require("./util/util.js");
 const controller = require("./controller");
 const { createReadStream } = require("fs");
 const path = require("path");
+const { request } = require("http");
 
 const allRoutes = {
   // create a link to the profile pic for it to show up
@@ -23,14 +24,15 @@ const allRoutes = {
   "/feed:get": (request, response) => {
     controller.getFeed(request, response);
   },
+  "/src/*:get": (request, response) => {
+    controller.getImage(request, response);
+  },
+
   // GET: when browswer wants some html from you
-  "/profile:get": (request, response) => {},
+  // "/profile:get": (request, response) => {},
   // 404 routes
   default: (request, response) => {
-    response.writeHead(404, DEFAULT_HEADER);
-    createReadStream(path.join(__dirname, "views", "404.html"), "utf8").pipe(
-      response
-    );
+    controller.pageNotFound(response);
   },
 };
 
@@ -39,7 +41,10 @@ function handler(request, response) {
 
   const { pathname } = parse(url, true);
 
-  const key = `${pathname}:${method.toLowerCase()}`;
+  const key = Object.keys(allRoutes).find((route) => {
+    const regex = new RegExp(`^${route.replace(/\*/g, ".*")}$`);
+    return regex.test(`${pathname}:${method.toLowerCase()}`);
+  });
   const chosen = allRoutes[key] || allRoutes.default;
 
   return Promise.resolve(chosen(request, response)).catch(

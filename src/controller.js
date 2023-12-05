@@ -23,7 +23,7 @@ const controller = {
     const template = await fs.readFile(homePath, "utf8");
 
     const renderedHtml = ejs.render(template, {
-      userArray,
+      users: userArray,
     });
 
     response.setHeader("Content-Type", "text/html");
@@ -35,9 +35,12 @@ const controller = {
     const userProfile = JSON.parse(profile);
     response.writeHead(200, { "Content-Type": "text/html" });
     const feedPath = path.join(__dirname, "feed.ejs");
+    console.log(userProfile);
     try {
       const ejsTemplateFeed = await fs.readFile(feedPath, "utf8");
-      const renderedTemplateFeed = ejs.render(ejsTemplateFeed, { userProfile });
+      const renderedTemplateFeed = ejs.render(ejsTemplateFeed, {
+        userInfo: userProfile,
+      });
       return response.end(renderedTemplateFeed);
     } catch (error) {
       console.error("Error rendering template:", error);
@@ -52,7 +55,7 @@ const controller = {
     stream.on("error", (error) => {
       if (error.code === "ENOENT") {
         // File not found
-        return pageNotFound(response);
+        controller.pageNotFound(response);
       } else {
         // Other errors
         console.error(`Error reading file: ${error.message}`);
@@ -62,7 +65,8 @@ const controller = {
     });
     stream.pipe(response);
   },
-  // uploadImages: (request, response) => {},
+
+  uploadImages: (request, response) => {},
 };
 
 module.exports = controller;

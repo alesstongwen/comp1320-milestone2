@@ -80,7 +80,6 @@ const controller = {
     });
     stream.pipe(response);
   },
-  test: async (request, response) => {},
 
   uploadImages: (request, response) => {},
 };

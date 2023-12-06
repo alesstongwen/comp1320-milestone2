@@ -27,9 +27,6 @@ const allRoutes = {
   "/src/*:get": (request, response) => {
     controller.getImage(request, response);
   },
-  // "/test:post": (request, response) => {
-  //   controller.test(request, response);
-  // },
   // GET: when browswer wants some html from you
   // "/profile:get": (request, response) => {},
   // 404 routes

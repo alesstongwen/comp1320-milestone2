@@ -39,37 +39,27 @@ const controller = {
       const url = new URL(request.url, `http://${request.headers.host}`);
       const username = url.searchParams.get("username");
 
-      // find username in Array
       const user = userArray.find((user) => user.username === username);
 
       if (user) {
-        const templatePath = path.join(__dirname, "template", "feed.ejs");
-        const template = await fs.readFile(templatePath, "utf8");
+        const feedPath = path.join(__dirname, "feed.ejs");
+        const template = await fs.readFile(feedPath, "utf8");
+
+        const userInfo = userArray.find((user) => user.username === username);
 
         if (userInfo !== null) {
-          console.log(`Instagram user info for ${username}:`, userInfo);
+          const renderedHtml = ejs.render(template, { userInfo: user });
           user.stats = userInfo;
-          console.log(user);
-
-          // EJS 渲染的 HTML
-          const renderedHtml = ejs.render(template, {
-            user: userArray,
-          });
-
           response.setHeader("Content-Type", "text/html");
           response.end(renderedHtml);
+        } else {
+          response.writeHead(404, { "Content-Type": "text/plain" });
+          response.end("User info not found");
         }
-      } else {
-        response.writeHead(404, {
-          "Content-Type": "text/plain",
-        });
-        response.end("User not found");
       }
     } catch (error) {
       console.error("Error:", error);
-      response.writeHead(500, {
-        "Content-Type": "text/plain",
-      });
+      response.writeHead(500, { "Content-Type": "text/plain" });
       response.end("Internal Server Error");
     }
   },

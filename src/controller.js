@@ -66,7 +66,25 @@ const controller = {
     stream.pipe(response);
   },
 
-  uploadImages: (request, response) => {},
+  uploadImages: (request, response) => {
+    const form = formidable({});
+    let fields;
+    let files;
+    try {
+        [fields, files] = await form.parse(req);
+    } catch (err) {
+        if (err.code === formidableErrors.maxFieldsExceeded) {
+
+        }
+        console.error(err);
+        res.writeHead(err.httpCode || 400, { 'Content-Type': 'text/plain' });
+        res.end(String(err));
+        return;
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ fields, files }, null, 2));
+    return;
+  }
 };
 
 module.exports = controller;

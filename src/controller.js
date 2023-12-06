@@ -31,21 +31,46 @@ const controller = {
   },
 
   getFeed: async (request, response) => {
-    const profile = await fs.readFile("./database/data.json", "utf8");
-    const userProfile = JSON.parse(profile);
-    response.writeHead(200, { "Content-Type": "text/html" });
-    const feedPath = path.join(__dirname, "feed.ejs");
-    console.log(userProfile);
     try {
-      const ejsTemplateFeed = await fs.readFile(feedPath, "utf8");
-      const renderedTemplateFeed = ejs.render(ejsTemplateFeed, {
-        userInfo: userProfile,
-      });
-      return response.end(renderedTemplateFeed);
+      const database = await fs.readFile("./database/data.json", "utf8");
+      const userArray = JSON.parse(database);
+
+      // Assuming your URL is in the request object
+      const url = new URL(request.url, `http://${request.headers.host}`);
+      const username = url.searchParams.get("username");
+
+      // find username in Array
+      const user = userArray.find((user) => user.username === username);
+
+      if (user) {
+        const templatePath = path.join(__dirname, "template", "feed.ejs");
+        const template = await fs.readFile(templatePath, "utf8");
+
+        if (userInfo !== null) {
+          console.log(`Instagram user info for ${username}:`, userInfo);
+          user.stats = userInfo;
+          console.log(user);
+
+          // EJS 渲染的 HTML
+          const renderedHtml = ejs.render(template, {
+            user: userArray,
+          });
+
+          response.setHeader("Content-Type", "text/html");
+          response.end(renderedHtml);
+        }
+      } else {
+        response.writeHead(404, {
+          "Content-Type": "text/plain",
+        });
+        response.end("User not found");
+      }
     } catch (error) {
-      console.error("Error rendering template:", error);
-      response.writeHead(500, { "Content-Type": "text/plain" });
-      return response.end("Server Error");
+      console.error("Error:", error);
+      response.writeHead(500, {
+        "Content-Type": "text/plain",
+      });
+      response.end("Internal Server Error");
     }
   },
   getImage: async (request, response) => {
@@ -65,26 +90,9 @@ const controller = {
     });
     stream.pipe(response);
   },
+  test: async (request, response) => {},
 
-  uploadImages: (request, response) => {
-    const form = formidable({});
-    let fields;
-    let files;
-    try {
-        [fields, files] = await form.parse(req);
-    } catch (err) {
-        if (err.code === formidableErrors.maxFieldsExceeded) {
-
-        }
-        console.error(err);
-        res.writeHead(err.httpCode || 400, { 'Content-Type': 'text/plain' });
-        res.end(String(err));
-        return;
-    }
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ fields, files }, null, 2));
-    return;
-  }
+  uploadImages: (request, response) => {},
 };
 
 module.exports = controller;

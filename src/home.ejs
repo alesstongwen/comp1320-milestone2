@@ -87,7 +87,7 @@
                           <span class="file-input-text">Upload images</span>
                           <input
                             type="file"
-                            name="file"
+                            name="images"
                             id="fileInput"
                             class="file-input"
                           />
@@ -119,7 +119,7 @@
 
         if (fileInput.files.length > 0) {
           fileNameDisplay.textContent =
-            "選擇的檔案: " + fileInput.files[0].name;
+            "img choose: " + fileInput.files[0].name;
           divWrapper.style.display = "block";
         } else {
           fileNameDisplay.textContent = "";

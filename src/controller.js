@@ -80,8 +80,88 @@ const controller = {
     });
     stream.pipe(response);
   },
+  uploadImages: async (request, response) => {
+    const database = await fs.readFile("./database/data.json", "utf8");
+    const userArray = JSON.parse(database);
+    const form = new formidable.IncomingForm();
 
-  uploadImages: (request, response) => {},
+    // setting allowEmptyFiles to true，allow empty file upload
+    form.keepExtensions = true;
+    form.allowEmptyFiles = true;
+
+    form.parse(request, async (err, fields, files) => {
+      if (err) {
+        console.error(err);
+        response.writeHead(500, {
+          "Content-Type": "text/plain",
+        });
+        response.end("Internal Server Error");
+        return;
+      }
+
+      const username = fields.username[0];
+      console.log("Username:", username);
+
+      // Ensure the user's directory exists
+      const userDir = path.join(__dirname, "photos", username);
+      try {
+        await fs.access(userDir); // Check if the directory exists
+      } catch (error) {
+        // If the directory doesn't exist, create it
+        await fs.mkdir(userDir, {
+          recursive: true,
+        });
+      }
+
+      const user = userArray.find((u) => u.username === username);
+
+      if (!files.images || !files.images[0] || !files.images[0].filepath) {
+        response.writeHead(400, {
+          "Content-Type": "text/plain",
+        });
+        response.end("No file uploaded or invalid field name");
+        return;
+      }
+
+      // Move the file to the new destination
+      const newFileName = files.images[0].originalFilename;
+      const encodedFileName = encodeURIComponent(newFileName);
+      const newPath = path.join(userDir, encodedFileName);
+
+      try {
+        await fs.copyFile(files.images[0].filepath, newPath);
+        await fs.unlink(files.images[0].filepath);
+      } catch (copyError) {
+        console.error(copyError);
+        response.writeHead(500, {
+          "Content-Type": "text/plain",
+        });
+        response.end("Error moving file");
+        return;
+      }
+
+      const newPhotoFileName = path.basename(newPath);
+      user.photos.push(newPhotoFileName);
+
+      try {
+        await fs.writeFile(
+          "./database/data.json",
+          JSON.stringify(userArray, null, 2),
+          "utf-8"
+        );
+        // Redirect to the homepage
+        response.writeHead(302, {
+          Location: "/",
+        });
+        response.end();
+      } catch (writeError) {
+        console.error(writeError);
+        response.writeHead(500, {
+          "Content-Type": "text/plain",
+        });
+        response.end("Error Save!");
+      }
+    });
+  },
 };
-
 module.exports = controller;

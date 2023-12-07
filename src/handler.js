@@ -28,7 +28,6 @@ const allRoutes = {
     controller.getImage(request, response);
   },
   // GET: when browswer wants some html from you
-  // "/profile:get": (request, response) => {},
   // 404 routes
   default: (request, response) => {
     controller.pageNotFound(response);

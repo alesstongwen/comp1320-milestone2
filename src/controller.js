@@ -85,7 +85,6 @@ const controller = {
     const userArray = JSON.parse(database);
     const form = new formidable.IncomingForm();
 
-    // setting allowEmptyFiles to true，allow empty file upload
     form.keepExtensions = true;
     form.allowEmptyFiles = true;
 
@@ -102,12 +101,10 @@ const controller = {
       const username = fields.username[0];
       console.log("Username:", username);
 
-      // Ensure the user's directory exists
       const userDir = path.join(__dirname, "photos", username);
       try {
-        await fs.access(userDir); // Check if the directory exists
+        await fs.access(userDir);
       } catch (error) {
-        // If the directory doesn't exist, create it
         await fs.mkdir(userDir, {
           recursive: true,
         });
@@ -115,7 +112,11 @@ const controller = {
 
       const user = userArray.find((u) => u.username === username);
 
-      if (!files.images || !files.images[0] || !files.images[0].filepath) {
+      if (
+        !files["images"] ||
+        !files["images"][0] ||
+        !files["images"][0].filepath
+      ) {
         response.writeHead(400, {
           "Content-Type": "text/plain",
         });
@@ -123,14 +124,13 @@ const controller = {
         return;
       }
 
-      // Move the file to the new destination
-      const newFileName = files.images[0].originalFilename;
+      const newFileName = files["images"][0].originalFilename;
       const encodedFileName = encodeURIComponent(newFileName);
       const newPath = path.join(userDir, encodedFileName);
 
       try {
-        await fs.copyFile(files.images[0].filepath, newPath);
-        await fs.unlink(files.images[0].filepath);
+        await fs.copyFile(files["images"][0].filepath, newPath);
+        await fs.unlink(files["images"][0].filepath);
       } catch (copyError) {
         console.error(copyError);
         response.writeHead(500, {
